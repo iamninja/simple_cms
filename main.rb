@@ -20,8 +20,18 @@ get '/pages' do
 	slim :index
 end
 
+post '/pages' do
+	page = Page.create(params[:page])
+	redirect to("/pages/#{page.id}")
+end
+
 get '/pages/:id' do
 	@page = Page.find(params[:id])
 	@title = @page.title
 	slim :show
+end
+
+get '/new' do
+	@page = Page.new
+	slim :new
 end
