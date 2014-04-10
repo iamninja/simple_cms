@@ -12,6 +12,11 @@ class Page
 
 	field :title, 		type: String
 	field :content, 	type: String
+	field :permalink, 	type: String,	default: -> { make_permalink }
+
+	def make_permalink
+		title.downcase.gsub(/W/,'-').squeeze('-').chomp('-') if title
+	end
 end
 
 get '/pages' do
@@ -55,4 +60,13 @@ end
 get '/new' do
 	@page = Page.new
 	slim :new
+end
+
+get '/:permalink' do
+  begin
+    @page = Page.find_by(permalink: params[:permalink])
+  rescue
+    pass
+  end
+  slim :show
 end
