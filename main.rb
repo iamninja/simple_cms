@@ -1,5 +1,4 @@
 require 'sinatra'
-require 'sinatra/reloader' if development?
 require 'mongoid'
 require 'slim'
 require "redcarpet"
@@ -13,4 +12,16 @@ class Page
 
 	field :title, 		type: String
 	field :content, 	type: String
+end
+
+get '/pages' do
+	@pages = Page.all
+	@title = "Simple CMS: Page List"
+	slim :index
+end
+
+get '/pages/:id' do
+	@page = Page.find(params[:id])
+	@title = @page.title
+	slim :show
 end
