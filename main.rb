@@ -19,6 +19,8 @@ class Page
 	end
 end
 
+get('/styles/main.css'){ scss :styles }
+
 get '/pages' do
 	@pages = Page.all
 	@title = "Simple CMS: Page List"
