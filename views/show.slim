@@ -1,3 +1,7 @@
 h1= @page.title
 - if @page.content
 	== markdown @page.content
+
+a href="/pages/#{@page.id}/edit" Edit this page
+
+a href="/pages/delete/#{@page.id}" Delete this page
