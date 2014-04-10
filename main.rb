@@ -5,6 +5,25 @@ require "redcarpet"
 
 configure do
 	Mongoid.load!("./mongoid.yml")
+	enable :sessions
+end
+
+helpers do
+	def admin?
+		session[:admin]
+	end
+
+	def protected!
+		halt 401, "Sorry, you are not authorized to see this page!" unless admin?
+	end
+
+	def url_for page
+		if admin?
+			"/pages/" + page.id
+		else
+			"/" + page.permalink
+		end
+	end
 end
 
 class Page
@@ -20,6 +39,8 @@ class Page
 end
 
 get('/styles/main.css'){ scss :styles }
+get('/login'){session[:admin]=true; redirect back}
+get('/logout'){session[:admin]=nil; redirect back}
 
 get '/pages' do
 	@pages = Page.all
@@ -28,6 +49,7 @@ get '/pages' do
 end
 
 post '/pages' do
+	protected!
 	page = Page.create(params[:page])
 	redirect to("/pages/#{page.id}")
 end
@@ -39,36 +61,41 @@ get '/pages/:id' do
 end
 
 put '/pages/:id' do
-  page = Page.find(params[:id])
-  page.update_attributes(params[:page])
-  redirect to("/pages/#{page.id}")
+	protected!
+	page = Page.find(params[:id])
+	page.update_attributes(params[:page])
+	redirect to("/pages/#{page.id}")
 end
 
 delete '/pages/:id' do
-  Page.find(params[:id]).destroy
-  redirect to('/pages')
+	protected!
+	Page.find(params[:id]).destroy
+	redirect to('/pages')
 end
 
 get '/pages/:id/edit' do
-  @page = Page.find(params[:id])
-  slim :edit
+	protected!
+	@page = Page.find(params[:id])
+	slim :edit
 end
 
 get '/pages/delete/:id' do
-  @page = Page.find(params[:id])
-  slim :delete
+	protected!
+	@page = Page.find(params[:id])
+	slim :delete
 end
 
 get '/new' do
+	protected!
 	@page = Page.new
 	slim :new
 end
 
 get '/:permalink' do
-  begin
-    @page = Page.find_by(permalink: params[:permalink])
-  rescue
-    pass
-  end
-  slim :show
+	begin
+		@page = Page.find_by(permalink: params[:permalink])
+	rescue
+		pass
+	end
+		slim :show
 end
